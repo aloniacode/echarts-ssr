@@ -1,76 +1,108 @@
 # Echarts SSR Service
 
 <div align="center">
-  
-📘English|[中文](./README.zh-CN.md).
+
+📘 English | [中文](./README.zh-CN.md)
 
 </div>
 
 > Inspired by [echarts5-canvas-ssr](https://github.com/mosliu/echarts5-canvas-ssr#readme).
 
-## Changes & Improvements
+## New Features
 
-- Update [echarts](https://echarts.apache.org/) to version `^5.4.*`. Support for some new features.
+- Based on Hono, fast and lightweight.
 
-- Use [skr canvas](https://github.com/Brooooooklyn/canvas) to instead of [node-canvas](https://github.com/Automattic/node-canvas).There is no need to install additional dependencies and the performance is excellent.
+- Supports two types of responses, including image buffer and SVG string.
 
-- Use `cluster` for efficiency.
+- Supports parsing function strings in Echarts options.
 
-- Support for two types of response,including image buffer and SVG string.
+- Multi-process architecture.
 
-- Support parsing functions in echarts option.
+- Uses [skr canvas](https://github.com/Brooooooklyn/canvas) instead of [node-canvas](https://github.com/Automattic/node-canvas), providing better canvas rendering performance.
 
 ## Usage
 
+### Local Development
+
 ```sh
+pnpm install
 
-docker build -t echarts-ssr-server:latest .
-
-docker run --name echarts-ssr-server-instance -dp 10086:10086 -v echarts-fonts:/usr/share/fonts echarts-ssr-server:latest
-
+pnpm run dev
 ```
 
-**Note**: Install the `package.json` dependencies inside the docker.
+### Service Deployment
 
-Body of `POST` Request :
+```sh
+pnpm install
+
+pnpm run build
+
+pnpm run start
+```
+
+### Container Deployment
+
+```sh
+docker build -t echarts-ssr-server:latest .
+
+docker run -d -p 7654:7654 --name echarts-ssr echarts-ssr:latest
+```
+
+## API Endpoints
+
+### Default Endpoint
+
+> Returns a simple message string. You can expand this endpoint to serve your own purposes.
+
+```http
+GET /
+```
+
+### Chart Endpoint
+
+```sh
+POST /chart
+```
+
+Body of `POST` Request:
 
 | Parameter | Type               | Description                                                                                                                                                                                   |
-| --------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`    | `'png'\|'svg'`     | Type of Response content. if the `type` value is `'png'`, the `Buffer` type data is returned. if the `type` value is `'svg'`, the Base64-encoded svg string is returned. Defaults to `'png'`. |
-| `option`  | `EchartCoreOption` | Options to configure Echart.                                                                                                                                                                  |
-| `width`   | `number \| string` | Chart width.                                                                                                                                                                                  |
-| `height`  | `number \| string` | Chart height.                                                                                                                                                                                 |
+| --------  | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`   | `'png' \| 'svg'`   | Type of response content. If the `type` value is `'png'`, the response will be binary data (`Buffer`). If the `type` value is `'svg'`, the response will be a Base64-encoded SVG string. Default is `'png'`. |
+| `option`  | `EchartCoreOption` | Echarts configuration options.                                                                                                                                                               |
+| `width`   | `number \| string` | Chart width.                                                                                                                                                                                 |
+| `height`  | `number \| string` | Chart height.                                                                                                                                                                                |
 
-If you need to use a function in the echarts option, send it as a string.For example:
+If you need to use a function in the echarts option, send it as a string. For example:
 
 ```json
 {
-    "legend": {
-        "data": ["Sales", "Marketing", "Technology"],
-        "formatter": "(name) => name.toUpperCase()"
-    }
+  "legend": {
+    "data": ["Sales", "Marketing", "Technology"],
+    "formatter": "(name) => name.toUpperCase()"
+  }
 }
 ```
 
 ## Custom Deployment
 
-You can customize the `ENV` variables in `Dockfile` to modify the default configurations.
+You can customize the `ENV` variables in `Dockerfile` to modify the default configurations.
 
-```Dockfile
+```Dockerfile
 # Number of worker threads.
 # Make sure you do not exceed the total number of CPU cores in your machine.
-# The best practice is half the total number of cpu cores.
+# The best practice is to use half the total number of CPU cores.
 ENV WORKER_PROCESSES=8
 
-# Simple verification for the server.
-ENV AUTHORIZATION="Bearer 123"
+# Simple authorization for the server. Default is "Bearer 123".
+ENV AUTHORIZATION="Bearer 123456789"
 
-# The hostname of node server. Defaults to "0.0.0.0".
+# Hostname of the Node server. Defaults to "0.0.0.0".
 ENV HOST="0.0.0.0"
 
-# The port of node server.Make sure the ports are consistent.Defaults to 7654.
-ENV PORT=10086
+# Port of the Node server. Ensure that the port is available. Default is `7654`.
+ENV PORT=9999
 
-# This value determines the resolution of the chart and defaults to window.devicePixelRatio in browsers.
+# This value determines the resolution of the chart and defaults to `window.devicePixelRatio` in browsers.
 ENV DEVICE_PIXEL_RATIO=1.5
 ```

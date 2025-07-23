@@ -1,0 +1,5 @@
+{
+  "entry": "src/index.ts",
+  "outDir": "dist",
+  "external": ["@napi-rs/canvas"]
+}

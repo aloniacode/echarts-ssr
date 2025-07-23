@@ -8,29 +8,61 @@
 
 > 该项目受[echarts5-canvas-ssr](https://github.com/mosliu/echarts5-canvas-ssr#readme)启发
 
-## 变更 & 改进
+## 新的特性
 
-- 更新 [echarts](https://echarts.apache.org/) 到 `^5.4.*`版本。支持一些新特性。
-
-- 使用 [skr canvas](https://github.com/Brooooooklyn/canvas) 替代 [node-canvas](https://github.com/Automattic/node-canvas)。这个库不需要安装额外的依赖并且性能更好。
-
-- 使用 `cluster` 提升效率。
+- 基于Hono构建，快速且轻量。
 
 - 支持两种类型的响应，包括图片 buffer 和 SVG 字符串。
 
-- 支持在 Echats 配置项中解析函数。
+- 支持解析Echarts配置项中的函数字符串。
+
+- 多进程。
+
+- 使用 [skr canvas](https://github.com/Brooooooklyn/canvas) 替代 [node-canvas](https://github.com/Automattic/node-canvas),提供更好的canvas渲染性能。
 
 ## 使用方法
 
+本地开发：
+
 ```sh
+pnpm install
 
-docker build -t echarts-ssr-server:latest .
-
-docker run --name echarts-ssr-server-instance -dp 10086:10086 -v echarts-fonts:/usr/share/fonts echarts-ssr-server:latest
-
+pnpm run dev
 ```
 
-**注意**: 在 docker 中安装 `package.json` 中的依赖.
+服务部署：
+
+```sh
+pnpm install
+
+pnpm run build
+
+pnpm run start
+```
+
+容器部署：
+
+```sh
+docker build -t echarts-ssr-server:latest .
+
+docker run -d -p 7654:7654 --name echarts-ssr echarts-ssr:latest
+```
+
+## 请求接口
+
+### 默认接口
+
+> 没有意义，返回提示字符串。你可以根据自己需要扩展它。
+
+```http
+GET /
+```
+
+### 图表接口
+
+```sh
+POST /chart
+```
 
 `POST`请求体 :
 
@@ -64,14 +96,14 @@ docker run --name echarts-ssr-server-instance -dp 10086:10086 -v echarts-fonts:/
 # 最佳实践是使用一半的CPU核数
 ENV WORKER_PROCESSES=8
 
-# 服务的简单验证
-ENV AUTHORIZATION="Bearer 123"
+# 服务的简单验证, 默认为Bearer 123
+ENV AUTHORIZATION="Bearer 123456789"
 
 # Node服务的hostname。默认为"0.0.0.0"
 ENV HOST="0.0.0.0"
 
 # Node服务的端口，请确保这个端口是可用的。默认为7654
-ENV PORT=10086
+ENV PORT=9999
 
 # 这个值决定了图表的分辨率，在浏览器中默认为window.devicePixelRatio
 ENV DEVICE_PIXEL_RATIO=1.5

@@ -1,37 +1,32 @@
-FROM node:18
+# Build phase
+FROM docker.1ms.run/node:22-alpine AS builder
 
-RUN yarn config set registry https://registry.npmmirror.com
+WORKDIR /app
 
-RUN yarn global add pm2 && yarn cache clean
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm && pnpm install
 
-WORKDIR /app/
+COPY src src
+COPY tsconfig.json .swcrc ./
+RUN pnpm build
 
-COPY package.json /app/
-COPY yarn.lock /app/
+# Running phase
 
-RUN yarn install
+FROM docker.1ms.run/node:22-alpine 
 
-COPY . /app/
+WORKDIR /app
 
-COPY fonts :/user/share
+COPY package.json ./
+RUN npm install -g pnpm && \
+    pnpm install --prod && \
+    pnpm remove @swc/cli @swc/core typescript tsx --force
 
-EXPOSE 10086
+COPY --from=builder /app/dist ./dist
 
-# The worker thread number.
-# Make sure you do not exceed the total number of CPU cores in your machine.
-# The best practice is half the total number of cpu cores.
-ENV WORKER_PROCESSES=8
+# Install fonts to support render canvas
+RUN apk add --no-cache font-dejavu
 
-# Simple verification for the server.
-ENV AUTHORIZATION="Bearer 123"
 
-# The hostname of node server. Defaults to "0.0.0.0".
-ENV HOST="0.0.0.0"
+EXPOSE 7654
 
-# The port of node server.Make sure the ports are consistent.Defaults to 7654.
-ENV PORT=10086
-
-# This value determines the resolution of the chart and defaults to window.devicePixelRatio in browsers.
-ENV DEVICE_PIXEL_RATIO=1.5
-
-CMD [ "pm2-runtime","main.js" ]
+CMD ["node","--experimental-specifier-resolution=node","dist/index.js"]
