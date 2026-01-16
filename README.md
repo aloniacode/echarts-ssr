@@ -12,7 +12,7 @@
 
 - Based on Hono, fast and lightweight.
 
-- Supports two types of responses, including image buffer and SVG string.
+- Supports two types of responses, including image buffer and SVG XML.
 
 - Supports parsing function strings in Echarts options.
 
@@ -68,7 +68,7 @@ Body of `POST` Request:
 
 | Parameter | Type               | Description                                                                                                                                                                                   |
 | --------  | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`   | `'png' \| 'svg'`   | Type of response content. If the `type` value is `'png'`, the response will be binary data (`Buffer`). If the `type` value is `'svg'`, the response will be a Base64-encoded SVG string. Default is `'png'`. |
+| `type`   | `'png' \| 'svg'`   | Type of response content. If the `type` value is `'png'`, the response will be binary data (`Buffer`). If the `type` value is `'svg'`, the response will be SVG XML. Default is `'png'`. |
 | `option`  | `EchartCoreOption` | Echarts configuration options.                                                                                                                                                               |
 | `width`   | `number \| string` | Chart width.                                                                                                                                                                                 |
 | `height`  | `number \| string` | Chart height.                                                                                                                                                                                |
@@ -94,8 +94,9 @@ You can customize the `ENV` variables in `Dockerfile` to modify the default conf
 # The best practice is to use half the total number of CPU cores.
 ENV WORKER_PROCESSES=8
 
-# Simple authorization for the server. Default is "Bearer 123".
-ENV AUTHORIZATION="Bearer 123456789"
+# Bearer authorization token required for authorization.
+# DO NOT ADD 'Bearer' prefix.
+ENV AUTHORIZATION="123456789"
 
 # Hostname of the Node server. Defaults to "0.0.0.0".
 ENV HOST="0.0.0.0"

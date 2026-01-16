@@ -12,7 +12,7 @@
 
 - 基于Hono构建，快速且轻量。
 
-- 支持两种类型的响应，包括图片 buffer 和 SVG 字符串。
+- 支持两种类型的响应，包括图片 buffer 和 SVG XML。
 
 - 支持解析Echarts配置项中的函数字符串。
 
@@ -68,7 +68,7 @@ POST /chart
 
 | 参数     | 类型               | 描述                                                                                                                                           |
 | -------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`   | `'png'\|'svg'`     | 响应内容的类型. 如果 `type` 值为 `'png'`, 则返回 `Buffer` 类型数据. 如果 `type` 值为 `'svg'`, 则返回 Base64 编码的 SVG 字符串. 默认为 `'png'`. |
+| `type`   | `'png'\|'svg'`     | 响应内容的类型. 如果 `type` 值为 `'png'`, 则返回 `Buffer` 类型数据. 如果 `type` 值为 `'svg'`, 则返回 SVG XML 字符串. 默认为 `'png'`. |
 | `option` | `EchartCoreOption` | Echarts 的配置项                                                                                                                               |
 | `width`  | `number \| string` | 图图表宽度                                                                                                                                     |
 | `height` | `number \| string` | 图表高度                                                                                                                                       |
@@ -96,7 +96,8 @@ POST /chart
 # 最佳实践是使用一半的CPU核数
 ENV WORKER_PROCESSES=8
 
-# 服务的简单验证, 默认为Bearer 123
+# 服务的Bearer验证token,必填
+# 请不要添加'Bearer'前缀
 ENV AUTHORIZATION="Bearer 123456789"
 
 # Node服务的hostname。默认为"0.0.0.0"
